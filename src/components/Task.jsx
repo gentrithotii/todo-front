@@ -62,6 +62,7 @@ const Task = () => {
 
   const deleteTodo = async (todoId) => {
     await deleteTodoById(todoId);
+    resetForm();
     loadTodos();
   };
 
@@ -78,22 +79,10 @@ const Task = () => {
     e.preventDefault();
 
     try {
-      const normalizedTodo = {
-        title: formData.title,
-        description: formData.description,
-        completed: formData.completed,
-        dueDate: formData.dueDate,
-        personId: user.id,
-        numberOfAttachments: formData.attachments.length,
-      };
-
       if (toUpdateTodo) {
-        await updateTodoDb(toUpdateTodo.id, {
-          ...toUpdateTodo,
-          ...normalizedTodo,
-        });
+        await updateTodoDb(toUpdateTodo.id, formData);
       } else {
-        await createTodo(normalizedTodo);
+        await createTodo(formData);
       }
 
       loadTodos();
