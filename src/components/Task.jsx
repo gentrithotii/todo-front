@@ -14,14 +14,20 @@ import { formatDate } from "../utils/dateformat.js";
 const Task = () => {
   const [getAllTodos, setGetAllTodos] = useState([]);
   const { user } = useAuth();
+  const [toUpdateTodo, setToUpdateTodo] = useState(null);
+
   const [formData, setFormData] = useState({
-    todoTitle: "",
-    todoDescription: "",
-    todoCompleted: false,
-    todoDueDate: "",
-    todoPersonId: user.id,
-    todoNumberOfAttachments: [],
+    title: "",
+    description: "",
+    completed: false,
+    dueDate: "",
+    personId: user.id,
+    attachments: [],
   });
+
+  useEffect(() => {
+    loadTodos();
+  }, []);
 
   const handleInputChange = (e) => {
     setFormData({
@@ -30,14 +36,23 @@ const Task = () => {
     });
   };
 
-  useEffect(() => {
-    loadTodos();
-  }, []);
-
   const handleFileChange = (e) => {
     setFormData({
       ...formData,
-      todoNumberOfAttachments: Array.from(e.target.files),
+      attachments: Array.from(e.target.files),
+    });
+  };
+
+  const updateTodo = (todoItem) => {
+    setToUpdateTodo(todoItem);
+
+    setFormData({
+      title: todoItem.title,
+      description: todoItem.description,
+      completed: todoItem.completed,
+      dueDate: todoItem.dueDate,
+      personId: user.id,
+      attachments: [],
     });
   };
 
@@ -47,14 +62,12 @@ const Task = () => {
 
   const deleteTodo = async (todoId) => {
     await deleteTodoById(todoId);
-
     loadTodos();
   };
 
   const markAsDone = async (todo) => {
     try {
       await updateTodoDb(todo.id, { ...todo, completed: !todo.completed });
-
       loadTodos();
     } catch (error) {
       console.error("Error updating todo:", error);
@@ -62,15 +75,44 @@ const Task = () => {
   };
 
   const handleSubmit = async (e) => {
-    console.log(e);
     e.preventDefault();
 
     try {
-      await createTodo(formData);
+      const normalizedTodo = {
+        title: formData.title,
+        description: formData.description,
+        completed: formData.completed,
+        dueDate: formData.dueDate,
+        personId: user.id,
+        numberOfAttachments: formData.attachments.length,
+      };
+
+      if (toUpdateTodo) {
+        await updateTodoDb(toUpdateTodo.id, {
+          ...toUpdateTodo,
+          ...normalizedTodo,
+        });
+      } else {
+        await createTodo(normalizedTodo);
+      }
+
       loadTodos();
-    } catch {
-      console.error("Error posting");
+      setToUpdateTodo(null);
+      resetForm();
+    } catch (error) {
+      console.error("Error posting:", error.response?.data || error.message);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      completed: false,
+      dueDate: "",
+      personId: user.id,
+      attachments: [],
+    });
   };
 
   return (
@@ -88,47 +130,49 @@ const Task = () => {
             <div className="col-md-8 mx-auto">
               <div className="card shadow-sm task-form-section">
                 <div className="card-body">
-                  <h2 className="card-title mb-4">Add New Task</h2>
+                  <h2 className="card-title mb-4">
+                    {toUpdateTodo ? "Edit Task" : "Add New Task"}
+                  </h2>
 
                   <form onSubmit={handleSubmit} id="todoForm">
                     <div className="mb-3">
-                      <label htmlFor="todoTitle" className="form-label">
+                      <label htmlFor="title" className="form-label">
                         Title
                       </label>
                       <input
                         type="text"
-                        name="todoTitle"
+                        name="title"
                         className="form-control"
-                        id="todoTitle"
+                        id="title"
                         required
-                        value={formData.todoTitle}
+                        value={formData.title}
                         onChange={handleInputChange}
                       />
                     </div>
                     <div className="mb-3">
-                      <label htmlFor="todoDescription" className="form-label">
+                      <label htmlFor="description" className="form-label">
                         Description
                       </label>
                       <textarea
-                        name="todoDescription"
+                        name="description"
                         className="form-control"
-                        id="todoDescription"
+                        id="description"
                         rows="3"
-                        value={formData.todoDescription}
+                        value={formData.description}
                         onChange={handleInputChange}
                       ></textarea>
                     </div>
                     <div className="row">
                       <div className="col-md-6 mb-3">
-                        <label htmlFor="todoDueDate" className="form-label">
+                        <label htmlFor="dueDate" className="form-label">
                           Due Date
                         </label>
                         <input
-                          name="todoDueDate"
+                          name="dueDate"
                           type="datetime-local"
                           className="form-control"
-                          id="todoDueDate"
-                          value={formData.todoDueDate}
+                          id="dueDate"
+                          value={formData.dueDate}
                           onChange={handleInputChange}
                         />
                       </div>
@@ -137,32 +181,40 @@ const Task = () => {
                       <label className="form-label">Attachments</label>
                       <div className="input-group mb-3">
                         <input
-                          name="todoAttachments"
+                          name="attachments"
                           type="file"
                           className="form-control"
-                          id="todoAttachments"
+                          id="attachments"
                           multiple
                           onChange={handleFileChange}
                         />
                         <button
                           className="btn btn-outline-secondary"
                           type="button"
+                          onClick={() =>
+                            setFormData({ ...formData, attachments: [] })
+                          }
                         >
                           <i className="bi bi-x-lg"></i>
                         </button>
                       </div>
-                      <div className="file-list" id="attachmentPreview"></div>
+                      <div className="file-list" id="attachmentPreview">
+                        {formData.attachments.map((file, idx) => (
+                          <div key={idx}>{file.name}</div>
+                        ))}
+                      </div>
                     </div>
                     <div className="d-grid gap-2 d-md-flex justify-content-md-end">
                       <button type="submit" className="btn btn-primary">
                         <i className="bi bi-plus-lg me-2"></i>
-                        Add Task
+                        {toUpdateTodo ? "Update Task" : "Add Task"}
                       </button>
                     </div>
                   </form>
                 </div>
               </div>
 
+              {/* Tasks */}
               <div className="card shadow-sm tasks-list mt-4">
                 <div className="card-header bg-white d-flex justify-content-between align-items-center">
                   <h5 className="card-title mb-0">Tasks</h5>
@@ -183,8 +235,6 @@ const Task = () => {
                 </div>
                 <div className="card-body">
                   <div className="list-group">
-                    {/* Task */}
-
                     {getAllTodos.map((todo) => (
                       <div
                         key={todo.id}
@@ -231,6 +281,7 @@ const Task = () => {
                             <button
                               className="btn btn-outline-primary btn-sm"
                               title="Edit"
+                              onClick={() => updateTodo(todo)}
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
