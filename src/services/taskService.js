@@ -59,16 +59,8 @@ export const deleteTodoById = async (id) => {
 };
 
 export const createTodo = async (data) => {
-  const object = {
-    title: data.todoTitle,
-    description: data.todoDescription,
-    completed: data.todoCompleted,
-    dueDate: data.todoDueDate,
-    personId: data.todoPersonId,
-  };
-
   try {
-    const response = await axios.post(`${API_URL}/todo`, object, {
+    const response = await axios.post(`${API_URL}/todo`, data, {
       headers: {
         Authorization: `Bearer ${authService.getToken()}`,
       },

@@ -158,6 +158,7 @@ const Task = () => {
                         className="form-control"
                         id="description"
                         rows="3"
+                        required
                         value={formData.description}
                         onChange={handleInputChange}
                       ></textarea>
@@ -172,6 +173,7 @@ const Task = () => {
                           type="datetime-local"
                           className="form-control"
                           id="dueDate"
+                          required
                           value={formData.dueDate}
                           onChange={handleInputChange}
                         />
