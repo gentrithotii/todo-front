@@ -48,9 +48,7 @@ const Task = () => {
   const deleteTodo = async (todoId) => {
     await deleteTodoById(todoId);
 
-    getAllTodosApi().then((data) => {
-      setGetAllTodos(data);
-    });
+    loadTodos();
   };
 
   const markAsDone = async (todo) => {
