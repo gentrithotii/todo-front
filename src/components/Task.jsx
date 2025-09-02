@@ -6,28 +6,36 @@ import {
   createTodo,
   deleteTodoById,
   getAllTodosApi,
+  getAllUsers,
+  toggleTodoCompleted,
   updateTodoDb,
 } from "../services/taskService.js";
-import { useAuth } from "../context/AuthContext.jsx";
 import { formatDate } from "../utils/dateformat.js";
 
 const Task = () => {
   const [getAllTodos, setGetAllTodos] = useState([]);
-  const { user } = useAuth();
   const [toUpdateTodo, setToUpdateTodo] = useState(null);
+  const [allUsers, setAllUsers] = useState([]);
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     completed: false,
     dueDate: "",
-    personId: user.id,
+    personId: 0,
     attachments: [],
   });
 
   useEffect(() => {
+    loadUsers();
     loadTodos();
   }, []);
+
+  const loadUsers = async () => {
+    const users = await getAllUsers();
+    console.log(users);
+    setAllUsers(users);
+  };
 
   const handleInputChange = (e) => {
     setFormData({
@@ -51,13 +59,18 @@ const Task = () => {
       description: todoItem.description,
       completed: todoItem.completed,
       dueDate: todoItem.dueDate,
-      personId: user.id,
+      personId: todoItem.personId,
       attachments: [],
     });
   };
 
-  const loadTodos = () => {
-    getAllTodosApi().then(setGetAllTodos);
+  const loadTodos = async () => {
+    const todos = await getAllTodosApi();
+    const normalized = todos.map((t) => ({
+      ...t,
+      dueDate: t.dueDate ? t.dueDate.slice(0, 16) : "",
+    }));
+    setGetAllTodos(normalized);
   };
 
   const deleteTodo = async (todoId) => {
@@ -68,12 +81,15 @@ const Task = () => {
 
   const markAsDone = async (todo) => {
     try {
-      await updateTodoDb(todo.id, { ...todo, completed: !todo.completed });
+      await toggleTodoCompleted(todo);
       loadTodos();
     } catch (error) {
       console.error("Error updating todo:", error);
     }
   };
+
+  // create a function to call get persons
+  // display and render people in the form and when you selected a person pass person id to todo object
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -99,7 +115,7 @@ const Task = () => {
       description: "",
       completed: false,
       dueDate: "",
-      personId: user.id,
+      personId: 0,
       attachments: [],
     });
   };
@@ -165,9 +181,34 @@ const Task = () => {
                           required
                           value={formData.dueDate}
                           onChange={handleInputChange}
+                          min={new Date().toISOString().slice(0, 16)}
                         />
                       </div>
+
+                      {/* Person  */}
+                      <div className="col-md-6 mb-3">
+                        <label htmlFor="todoPerson" className="form-label">
+                          Assign to Person
+                        </label>
+                        <select
+                          className="form-select"
+                          id="todoPerson"
+                          name="personId"
+                          value={formData.personId}
+                          onChange={handleInputChange}
+                        >
+                          <option value="">
+                            -- Select Person (Optional) --
+                          </option>
+                          {allUsers.map((u) => (
+                            <option key={u.id} value={u.id}>
+                              {u.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
+
                     <div className="mb-3">
                       <label className="form-label">Attachments</label>
                       <div className="input-group mb-3">
@@ -248,7 +289,7 @@ const Task = () => {
                                 {formatDate(todo.dueDate)}
                               </small>
                               <span className="badge bg-info me-2">
-                                <i className="bi bi-person"></i> {user.name}
+                                <i className="bi bi-person"></i> {todo.personId}
                               </span>
                               <span
                                 className={

@@ -1,13 +1,13 @@
 export const formatDate = (date) => {
-  const newDate = new Date(date);
+  if (!date) {
+    return "";
+  }
 
-  const formatedDate = newDate.toLocaleDateString(undefined, {
-    year: "2-digit",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "numeric",
-  });
+  const [datePart, timePart] = date.split("T");
 
-  return formatedDate;
+  const cleanedTimePart = timePart
+    ? timePart.split(":").slice(0, 2).join(":")
+    : "";
+
+  return `${datePart} ${cleanedTimePart}`.trim();
 };

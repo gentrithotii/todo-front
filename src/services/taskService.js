@@ -1,74 +1,104 @@
-//*todo: implement taskService and call the API
-
 import axios from "axios";
 import { authService } from "./authService";
 
 const API_URL = "http://localhost:9090/api";
 
-export const getAllTodosByPersonId = async (id) => {
-  const response = await axios.get(`${API_URL}/todo/person/2`, {
-    headers: {
-      Authorization: `Bearer ${authService.getToken()}`,
-    },
-  });
+const authConfig = () => ({
+  headers: {
+    Authorization: `Bearer ${authService.getToken()}`,
+  },
+});
 
-  const payload = response.data;
-  console.log(payload);
-  return payload;
+export const toggleTodoCompleted = async (todo) => {
+  try {
+    const updatedTodo = {
+      ...todo,
+      completed: !todo.completed,
+      attachments: todo.attachments || [],
+      dueDate: todo.dueDate,
+    };
+    return await updateTodoDb(todo.id, updatedTodo);
+  } catch (error) {
+    console.error("Error toggling todo:", error);
+    throw error;
+  }
 };
 
-export const updateTodoDb = async (todoId, todoData) => {
-  try {
-    const response = await axios.put(`${API_URL}/todo/${todoId}`, todoData, {
-      headers: {
-        Authorization: `Bearer ${authService.getToken()}`,
-      },
-    });
+const buildFormData = (data) => {
+  const fd = new FormData();
 
+  fd.append(
+    "todo",
+    new Blob(
+      [
+        JSON.stringify({
+          title: data.title,
+          description: data.description,
+          completed: data.completed,
+          dueDate: data.dueDate,
+          personId: data.personId || null,
+        }),
+      ],
+      { type: "application/json" }
+    )
+  );
+
+  if (data.attachments && data.attachments.length > 0) {
+    data.attachments.forEach((file) => fd.append("files", file));
+  }
+
+  return fd;
+};
+
+export const getAllUsers = async () => {
+  console.log(authService.getToken());
+  try {
+    const response = await axios.get(`${API_URL}/person`, authConfig());
     return response.data;
   } catch (error) {
-    console.error("Not updated:", error);
+    console.error("Could not fetch users:", error);
     throw error;
   }
 };
 
 export const getAllTodosApi = async () => {
-  const response = await axios.get(`${API_URL}/todo`, {
-    headers: {
-      Authorization: `Bearer ${authService.getToken()}`,
-    },
-  });
-
-  const payload = response.data;
-  console.log(payload);
-  return payload;
-};
-
-export const deleteTodoById = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/todo/${id}`, {
-      headers: {
-        Authorization: `Bearer ${authService.getToken()}`,
-      },
-    });
+    const response = await axios.get(`${API_URL}/todo`, authConfig());
     return response.data;
   } catch (error) {
-    console.error("Not deleted:", error);
+    console.error("Could not fetch todos:", error);
     throw error;
   }
 };
 
 export const createTodo = async (data) => {
   try {
-    const response = await axios.post(`${API_URL}/todo`, data, {
-      headers: {
-        Authorization: `Bearer ${authService.getToken()}`,
-      },
-    });
-
+    const fd = buildFormData(data);
+    const response = await axios.post(`${API_URL}/todo`, fd, authConfig());
     return response.data;
   } catch (error) {
-    console.error("Error creating todo:", error);
+    console.error("Error creating todo:", error.response?.data || error);
+    throw error;
+  }
+};
+
+export const updateTodoDb = async (id, data) => {
+  try {
+    const fd = buildFormData(data);
+    const response = await axios.put(`${API_URL}/todo/${id}`, fd, authConfig());
+    return response.data;
+  } catch (error) {
+    console.error("Error updating todo:", error.response?.data || error);
+    throw error;
+  }
+};
+
+export const deleteTodoById = async (id) => {
+  try {
+    const response = await axios.delete(`${API_URL}/todo/${id}`, authConfig());
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting todo:", error.response?.data || error);
     throw error;
   }
 };
