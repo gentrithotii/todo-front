@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import { getAllUsers } from "../services/userService";
+import RegisterUser from "./RegisterUser";
 
 const User = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
+  const [showForm, setShowForm] = useState(false);
 
   const filteredUsers = users.filter(
     (u) =>
@@ -15,7 +17,7 @@ const User = () => {
 
   useEffect(() => {
     loadAllUsers();
-  });
+  }, []);
 
   const loadAllUsers = async () => {
     try {
@@ -45,19 +47,46 @@ const User = () => {
           subtitle="Manage and organize your Users"
           onToggleSidebar={() => {}}
         />
+
         <div className="container mt-4">
+          {showForm ? (
+            <RegisterUser
+              onRegister={(newUser) => {
+                setUsers((prev) => [
+                  ...prev,
+                  { id: prev.length + 1, ...newUser },
+                ]);
+              }}
+            />
+          ) : (
+            <></>
+          )}
+
           <div className="d-flex justify-content-between align-items-center mb-3">
-            <h3>Manage Users</h3>
-            <div className="input-group" style={{ maxWidth: "300px" }}>
+            <h4>Manage Users</h4>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="btn btn-primary mx-2 btn-sm"
+            >
+              {showForm ? "Hide Form" : "Register user"}
+            </button>
+            <div
+              className="input-group input-group-sm flex-nowrap"
+              style={{ maxWidth: "250px" }}
+            >
               <input
                 type="text"
-                className="form-control"
+                className="form-control form-control-sm"
                 placeholder="Search users..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-              <button className="btn btn-outline-secondary" type="button">
-                <i className="bi bi-search"></i> Search
+              <button
+                className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                type="button"
+                style={{ width: "36px" }}
+              >
+                <i className="bi bi-search"></i>
               </button>
             </div>
           </div>
@@ -82,13 +111,13 @@ const User = () => {
                           className="btn btn-warning btn-sm me-2"
                           onClick={() => handleUpdate(user.id)}
                         >
-                          <i className="bi bi-pencil"></i> Update
+                          <i className="bi bi-pencil small"></i> Update
                         </button>
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(user.id)}
                         >
-                          <i className="bi bi-trash"></i> Delete
+                          <i className="bi bi-trash small"></i> Delete
                         </button>
                       </div>
                     </div>
