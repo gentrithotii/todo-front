@@ -33,7 +33,6 @@ const Task = () => {
 
   const loadUsers = async () => {
     const users = await getAllUsers();
-    console.log(users);
     setAllUsers(users);
   };
 
