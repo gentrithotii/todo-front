@@ -1,13 +1,5 @@
 import axios from "axios";
-import { authService } from "./authService";
-
-const API_URL = "http://localhost:9090/api";
-
-const authConfig = () => ({
-  headers: {
-    Authorization: `Bearer ${authService.getToken()}`,
-  },
-});
+import { API_URL, authConfig } from "../utils/apiUrlToken";
 
 export const toggleTodoCompleted = async (todo) => {
   try {
@@ -48,17 +40,6 @@ const buildFormData = (data) => {
   }
 
   return fd;
-};
-
-export const getAllUsers = async () => {
-  console.log(authService.getToken());
-  try {
-    const response = await axios.get(`${API_URL}/person`, authConfig());
-    return response.data;
-  } catch (error) {
-    console.error("Could not fetch users:", error);
-    throw error;
-  }
 };
 
 export const getAllTodosApi = async () => {

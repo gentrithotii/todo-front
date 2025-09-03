@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import "./Task.css";
 import Sidebar from "./Sidebar";
 import Header from "./Header.jsx";
@@ -6,11 +6,11 @@ import {
   createTodo,
   deleteTodoById,
   getAllTodosApi,
-  getAllUsers,
   toggleTodoCompleted,
   updateTodoDb,
 } from "../services/taskService.js";
 import { formatDate } from "../utils/dateformat.js";
+import { getAllUsers } from "../services/userService.js";
 
 const Task = () => {
   const [getAllTodos, setGetAllTodos] = useState([]);
