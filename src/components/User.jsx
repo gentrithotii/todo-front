@@ -1,20 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
+import { getAllUsers } from "../services/userService";
 
 const User = () => {
   const [search, setSearch] = useState("");
-  const [users, setUsers] = useState([
-    { id: 1, name: "Alice Johnson", email: "alice@example.com" },
-    { id: 2, name: "Bob Smith", email: "bob@example.com" },
-    { id: 3, name: "Charlie Brown", email: "charlie@example.com" },
-  ]);
+  const [users, setUsers] = useState([]);
 
   const filteredUsers = users.filter(
     (u) =>
       u.name.toLowerCase().includes(search.toLowerCase()) ||
       u.email.toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => {
+    loadAllUsers();
+  });
+
+  const loadAllUsers = async () => {
+    try {
+      setUsers(await getAllUsers());
+    } catch (error) {
+      console.error("Could not get users: ", error);
+      throw error;
+    }
+  };
 
   const handleUpdate = (id) => {
     alert(`Update user with ID: ${id}`);
@@ -59,9 +69,12 @@ const User = () => {
                   <div className="card shadow-sm h-100">
                     <div className="card-body d-flex justify-content-between align-items-center">
                       <div>
+                        <h5 className="card-text text-muted mb-0">
+                          Id: {user.id}
+                        </h5>
                         <h5 className="card-title mb-1">{user.name}</h5>
                         <p className="card-text text-muted mb-0">
-                          {user.email}
+                          Email: {user.email}
                         </p>
                       </div>
                       <div>
