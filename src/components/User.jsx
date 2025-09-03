@@ -31,8 +31,8 @@ const User = () => {
       <Sidebar isOpen={false} onClose={() => {}} />
       <main className="dashboard-main">
         <Header
-          title="Tasks"
-          subtitle="Manage and organize your tasks"
+          title="Teams"
+          subtitle="Manage and organize your Users"
           onToggleSidebar={() => {}}
         />
         <div className="container mt-4">
