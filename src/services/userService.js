@@ -46,12 +46,6 @@ export const updateUser = async (id, data) => {
       authConfig()
     );
 
-    if (response.status === 204) {
-      console.log("User updated");
-    } else {
-      console.log("Response:", response);
-    }
-
     return response.status;
   } catch (err) {
     console.error("Could not update user with id:", id, err);
