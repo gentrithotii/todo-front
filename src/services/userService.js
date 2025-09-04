@@ -24,3 +24,16 @@ export const createUser = async (data) => {
     throw error;
   }
 };
+
+export const deleteUser = async (id) => {
+  try {
+    const response = await axios.delete(
+      `${API_URL}/person/${id}`,
+      authConfig()
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Usere could not be deleted");
+    throw error;
+  }
+};

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { createUser, getAllUsers } from "../services/userService";
+import { createUser, deleteUser, getAllUsers } from "../services/userService";
 import RegisterUser from "./RegisterUser";
 
 const User = () => {
@@ -39,8 +39,9 @@ const User = () => {
 
   const handleDelete = (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
-      setUsers(users.filter((u) => u.id !== id));
+      deleteUser(id);
     }
+    loadAllUsers();
   };
 
   return (
