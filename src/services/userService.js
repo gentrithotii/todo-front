@@ -10,3 +10,17 @@ export const getAllUsers = async () => {
     throw error;
   }
 };
+
+export const createUser = async (data) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/person/register`,
+      data,
+      authConfig()
+    );
+    return response;
+  } catch (error) {
+    console.error("Cant add user ", error);
+    throw error;
+  }
+};

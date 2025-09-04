@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { getAllUsers } from "../services/userService";
+import { createUser, getAllUsers } from "../services/userService";
 import RegisterUser from "./RegisterUser";
 
 const User = () => {
@@ -28,6 +28,11 @@ const User = () => {
     }
   };
 
+  const registerUser = async (data) => {
+    await createUser(data);
+    loadAllUsers();
+  };
+
   const handleUpdate = (id) => {
     alert(`Update user with ID: ${id}`);
   };
@@ -50,14 +55,7 @@ const User = () => {
 
         <div className="container mt-4">
           {showForm ? (
-            <RegisterUser
-              onRegister={(newUser) => {
-                setUsers((prev) => [
-                  ...prev,
-                  { id: prev.length + 1, ...newUser },
-                ]);
-              }}
-            />
+            <RegisterUser onRegister={(u) => registerUser(u)} />
           ) : (
             <></>
           )}

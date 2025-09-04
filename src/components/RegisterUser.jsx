@@ -142,12 +142,12 @@ const RegisterUser = ({ onRegister }) => {
               className={`form-select form-select-sm ${
                 errors.role ? "is-invalid" : ""
               }`}
-              {...register("role", { required: "Role is required" })}
+              {...register("userRole", { required: "Role is required" })}
             >
               <option value="">Select a role</option>
-              <option value="admin">Admin</option>
-              <option value="moderator">Moderator</option>
-              <option value="user">User</option>
+              <option value="ADMIN">Admin</option>
+              <option value="MODERATOR">Moderator</option>
+              <option value="USER">User</option>
             </select>
             {errors.role && (
               <div className="invalid-feedback">{errors.role.message}</div>

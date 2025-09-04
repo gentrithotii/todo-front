@@ -50,9 +50,9 @@ const Task = () => {
     });
   };
 
-  const updateTodo = (todoItem) => {
+  const formDataUpdateExisting = (todoItem) => {
     setToUpdateTodo(todoItem);
-
+    //TODO Check attachment
     setFormData({
       title: todoItem.title,
       description: todoItem.description,
@@ -86,9 +86,6 @@ const Task = () => {
       console.error("Error updating todo:", error);
     }
   };
-
-  // create a function to call get persons
-  // display and render people in the form and when you selected a person pass person id to todo object
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -312,7 +309,7 @@ const Task = () => {
                             <button
                               className="btn btn-outline-primary btn-sm"
                               title="Edit"
-                              onClick={() => updateTodo(todo)}
+                              onClick={() => formDataUpdateExisting(todo)}
                             >
                               <i className="bi bi-pencil"></i>
                             </button>
