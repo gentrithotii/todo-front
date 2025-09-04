@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import { createUser, deleteUser, getAllUsers } from "../services/userService";
+import {
+  createUser,
+  deleteUser,
+  getAllUsers,
+  updateUser,
+} from "../services/userService";
 import RegisterUser from "./RegisterUser";
+import ModalWrapper from "./ModalWrapper";
 
 const User = () => {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
-  const [showForm, setShowForm] = useState(false);
+  const [toUpdateUser, setToUpdateUser] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const filteredUsers = users.filter(
     (u) =>
@@ -24,24 +32,26 @@ const User = () => {
       setUsers(await getAllUsers());
     } catch (error) {
       console.error("Could not get users: ", error);
-      throw error;
     }
   };
 
   const registerUser = async (data) => {
     await createUser(data);
     loadAllUsers();
+    setShowRegisterModal(false);
   };
 
-  const handleUpdate = (id) => {
-    alert(`Update user with ID: ${id}`);
-  };
-
-  const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      deleteUser(id);
-    }
+  const handleUpdate = async (id, data) => {
+    await updateUser(id, data);
     loadAllUsers();
+    setShowUpdateModal(false);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      await deleteUser(id);
+      loadAllUsers();
+    }
   };
 
   return (
@@ -55,19 +65,13 @@ const User = () => {
         />
 
         <div className="container mt-4">
-          {showForm ? (
-            <RegisterUser onRegister={(u) => registerUser(u)} />
-          ) : (
-            <></>
-          )}
-
           <div className="d-flex justify-content-between align-items-center mb-3">
             <h4>Manage Users</h4>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => setShowRegisterModal(true)}
               className="btn btn-primary mx-2 btn-sm"
             >
-              {showForm ? "Hide Form" : "Register user"}
+              Register User
             </button>
             <div
               className="input-group input-group-sm flex-nowrap"
@@ -81,9 +85,8 @@ const User = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
               <button
-                className="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center"
+                className="btn btn-outline-secondary btn-sm"
                 type="button"
-                style={{ width: "36px" }}
               >
                 <i className="bi bi-search"></i>
               </button>
@@ -108,7 +111,10 @@ const User = () => {
                       <div>
                         <button
                           className="btn btn-warning btn-sm me-2"
-                          onClick={() => handleUpdate(user.id)}
+                          onClick={() => {
+                            setToUpdateUser(user);
+                            setShowUpdateModal(true);
+                          }}
                         >
                           <i className="bi bi-pencil small"></i> Update
                         </button>
@@ -129,6 +135,22 @@ const User = () => {
           </div>
         </div>
       </main>
+
+      <ModalWrapper
+        title="Register New User"
+        show={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+      >
+        <RegisterUser onRegister={registerUser} />
+      </ModalWrapper>
+
+      <ModalWrapper
+        title="Update User"
+        show={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+      >
+        <RegisterUser toUpdateUser={toUpdateUser} update={handleUpdate} />
+      </ModalWrapper>
     </div>
   );
 };
